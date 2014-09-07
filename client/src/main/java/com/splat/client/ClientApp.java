@@ -16,6 +16,10 @@ public class ClientApp {
         String name = "Service";
         Registry registry = LocateRegistry.getRegistry("localhost", 1099);
         AccountService service = (AccountService) registry.lookup(name);
-        System.out.println(service.getAmount(5));
+        service.addAmount(10, 10L);
+        service.addAmount(11, 10L);
+        service.addAmount(12, 10L);
+        service.addAmount(1000, -5L);
+        service.resetStatistics();
     }
 }

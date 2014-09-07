@@ -3,9 +3,6 @@ package com.splat.common;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-/**
- * Created by Alex on 05.09.2014.
- */
 public interface AccountService extends Remote {
     /**
      * Retrieves current balance or zero if addAmount() method was not called before for specified id
@@ -21,7 +18,7 @@ public interface AccountService extends Remote {
      */
     void addAmount(Integer id, Long value) throws RemoteException;
 
-    void getStats() throws RemoteException;
+    long[] getStats() throws RemoteException;
 
     void resetStatistics() throws RemoteException;
 }

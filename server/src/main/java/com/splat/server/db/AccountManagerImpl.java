@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Created by Alex on 04.09.2014.
  */
-public class AccountManagerImpl {
+public class AccountManagerImpl implements AccountManager{
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("PersistenceUnit");
     private final static Logger LOG = Logger.getLogger(AccountManagerImpl.class);
 
@@ -43,6 +43,7 @@ public class AccountManagerImpl {
      * Returns all table content
      * @return list of accounts
      */
+    @Override
     public List<Account> getAllAccounts() {
         EntityManager em = emf.createEntityManager();
         CriteriaQuery<Account> criteria = em.getCriteriaBuilder().createQuery(Account.class);
@@ -54,6 +55,7 @@ public class AccountManagerImpl {
         return list;
     }
 
+    @Override
     public void loadCacheToDB(Map<Integer, AtomicReference<Account>> map) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
@@ -65,12 +67,11 @@ public class AccountManagerImpl {
                 entry.setModified(false);
                 em.persist(em.merge(entry));
                 ref.set(entry);
-                //map.put(key, ref);
             }
         }
         em.getTransaction().commit();
         em.close();
-        LOG.info("loaded!");
+        LOG.info("content loaded!");
     }
 
 }

@@ -3,14 +3,10 @@ package com.splat.server;
 import com.splat.server.db.Account;
 import com.splat.server.db.AccountManagerImpl;
 import org.apache.log4j.Logger;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Created by Alex on 05.09.2014.
- */
 public enum ServiceManager {
     INSTANCE;
     private static Logger LOG = Logger.getLogger(ServiceManager.class);
@@ -19,10 +15,6 @@ public enum ServiceManager {
 
     public Map<Integer, AtomicReference<Account>> getCache() {
         return cache;
-    }
-
-    public void setAccount(Integer id, Long value) {
-
     }
 
     public void initCache() {
