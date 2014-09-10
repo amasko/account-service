@@ -6,15 +6,16 @@ import javax.persistence.*;
 @Table(name = "account")
 public class Account {
 
+    private boolean modified = false;
+
     public Account() {
     }
 
     public Account(Integer id, Long amount) {
         this.id = id;
         this.amount = amount;
+        modified = true;
     }
-
-    private boolean modified = false;
 
     @Id
     //@GeneratedValue
@@ -26,7 +27,7 @@ public class Account {
 
     /**
      * Method will help optimize storing data into database.
-     * If modified = false there's no need to store entity from cache to database
+     * If modified == false there's no need to store entity from cache to database
      * @param modified is account changed between cache and database synchronization
      */
     public void setModified(boolean modified) {

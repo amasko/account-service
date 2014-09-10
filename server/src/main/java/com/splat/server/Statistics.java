@@ -16,11 +16,15 @@ public enum Statistics {
         queries.incrementAndGet();
     }
 
-    public long getRate() {
-        long time = System.currentTimeMillis() - timeStamp;
+    public long[] stats() {
+        long[] statsArray = new long[3];
+        long interval = System.currentTimeMillis() - timeStamp;
         long tempQueries = queries.get();
-        double rate = (double) time / (double) tempQueries * 1000;
-        return (long) rate;
+        statsArray[0] = interval;
+        statsArray[1] = tempQueries;
+        double rate = 1000 * (double) tempQueries / (double) interval;
+        statsArray[2] = (long) rate;
+        return statsArray;
     }
 
     public long getQueries() {

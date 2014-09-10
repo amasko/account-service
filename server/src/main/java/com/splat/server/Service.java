@@ -1,7 +1,6 @@
 package com.splat.server;
 
 import com.splat.common.AccountService;
-import com.splat.server.db.AccountManagerImpl;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -14,7 +13,7 @@ public class Service extends UnicastRemoteObject implements AccountService {
     @Override
     public Long getAmount(Integer id) throws RemoteException {
         Statistics.INSTANCE.increment();
-        return ServiceManager.INSTANCE.getCache().get(id).get().getAmount();
+        return ServiceManager.INSTANCE.getAmount(id);
     }
 
     @Override
@@ -25,11 +24,11 @@ public class Service extends UnicastRemoteObject implements AccountService {
 
     @Override
     public long[] getStats() throws RemoteException {
-        return new long[]{Statistics.INSTANCE.getQueries(), Statistics.INSTANCE.getRate()};
+        return  Statistics.INSTANCE.stats();
     }
 
     @Override
     public void resetStatistics() throws RemoteException {
-        new AccountManagerImpl().loadCacheToDB(ServiceManager.INSTANCE.getCache());
+        Statistics.INSTANCE.initStatistics();
     }
 }

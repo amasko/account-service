@@ -1,46 +1,38 @@
 package com.splat.server;
 
 import com.splat.common.AccountService;
-import com.splat.server.db.Account;
-import com.splat.server.db.AccountManagerImpl;
-
-import javax.jnlp.*;
-import java.lang.instrument.Instrumentation;
+import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Scanner;
 
 public class ServerApp {
-    public static void main(String[] args) throws RemoteException, AlreadyBoundException, UnknownHostException {
-
-//        List<Account> list = ai.getAllAccounts();
-//        System.out.println(list.size() + " " + list.get(200));
-
-
+    public static void main(String[] args) throws RemoteException,
+            AlreadyBoundException, UnknownHostException, NotBoundException {
+        //loading content from db to cache
         ServiceManager.INSTANCE.initCache();
-        System.out.println(ServiceManager.INSTANCE.getCache().size()
-        );
-
-//        ServiceManager.INSTANCE.addAmount(3, 5L);
-//        System.out.println(ServiceManager.INSTANCE.getCache().get(3).get());
-//
-//        ServiceManager.INSTANCE.addAmount(1200, 50L);
-//        AccountManagerImpl ai = new AccountManagerImpl();
-//        ai.loadCacheToDB(ServiceManager.INSTANCE.getCache());
-//        System.out.println(ServiceManager.INSTANCE.getCache().get(3).get());
-//        System.out.println(ServiceManager.INSTANCE.getCache().get(1200).get());
-
-//        System.out.println( ServiceManager.INSTANCE.getCache().get(25) );
-
+        Statistics.INSTANCE.initStatistics();
+        System.out.println(ServiceManager.INSTANCE.getCache().size());
+        //Establishing server connection
         String name = "Service";
         AccountService service = new Service();
         Registry registry = LocateRegistry.createRegistry(1099);
         registry.bind(name, service);
-
+        //shut server down
+        Scanner scanner = new Scanner(new InputStreamReader(System.in));
+        String input = "";
+        while (!input.equals("e")) {
+            System.out.println("For shutting server down enter letter `e`");
+            input = scanner.next();
+        }
+        ServiceManager.INSTANCE.stopDbsync();
+        registry.unbind(name);
+        UnicastRemoteObject.unexportObject(service, true);
+        System.exit(0);
     }
 }

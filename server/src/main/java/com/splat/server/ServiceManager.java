@@ -17,11 +17,28 @@ public enum ServiceManager {
         return cache;
     }
 
+    public Long getAmount(Integer id) {
+        if (!cache.containsKey(id)) {
+            return 0L;
+        }
+        return cache.get(id).get().getAmount();
+    }
+
+    public void stopDbsync() {
+        accountManager.stopDBsync();
+    }
+
     public void initCache() {
         for (Account acc : accountManager.getAllAccounts()) {
             cache.put(acc.getId(), new AtomicReference<>(acc));
         }
+        //temporary
+//        for (Integer key : cache.keySet()) {
+//            cache.put(key, new AtomicReference<>(new Account(key, 0L)));
+//        }
         LOG.info("Cache initialized");
+        accountManager.DBsync(cache);
+        LOG.info("Periodic cache -> DB sync started");
     }
 
     public void addAmount(Integer id, Long value) {

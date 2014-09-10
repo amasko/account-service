@@ -8,36 +8,19 @@ import javax.persistence.Persistence;
 import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Created by Alex on 04.09.2014.
- */
 public class AccountManagerImpl implements AccountManager{
-    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("PersistenceUnit");
+    private static final EntityManagerFactory emf =
+            Persistence.createEntityManagerFactory("PersistenceUnit");
+    private final ScheduledExecutorService scheduler =
+            Executors.newScheduledThreadPool(1);
     private final static Logger LOG = Logger.getLogger(AccountManagerImpl.class);
-
-    public void test() {
-        LOG.info("Logging is happening here");
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-//        Account account = em.find(Account.class, 25);
-//        System.out.println(account.getAmount());
-//        Account acc2 = em.find(Account.class, 2002);
-//        if (acc2 == null) {
-//            System.out.println("no such entry");
-//            acc2 = new Account(2002, 2002L);
-//            em.persist(em.merge(acc2));
-//
-//        }
-        Account account1 = new Account(10, 1L);
-        em.persist(em.merge(account1));
-
-
-        em.getTransaction().commit();
-        em.close();
-    }
+    private ScheduledFuture<?> loaderHandler;
 
     /**
      * Returns all table content
@@ -59,6 +42,7 @@ public class AccountManagerImpl implements AccountManager{
     public void loadCacheToDB(Map<Integer, AtomicReference<Account>> map) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
+        int count = 0;
         for (Integer key : map.keySet()) {
             AtomicReference<Account> ref = map.get(key);
             Account entry = ref.get();
@@ -67,11 +51,38 @@ public class AccountManagerImpl implements AccountManager{
                 entry.setModified(false);
                 em.persist(em.merge(entry));
                 ref.set(entry);
+                count++;
             }
         }
         em.getTransaction().commit();
         em.close();
-        LOG.info("content loaded!");
+        LOG.info("Updated " + count + " accounts;");
     }
+
+    /**
+     * Loads cache content to database with a given period (20 sec)
+     * @param map
+     */
+    public void DBsync(final Map<Integer, AtomicReference<Account>> map) {
+        final Runnable loader = new Runnable() {
+            @Override
+            public void run() {
+                long start = System.currentTimeMillis();
+                LOG.info("start uploading cache to DB ");
+                loadCacheToDB(map);
+                long finish = System.currentTimeMillis();
+                LOG.info("finished uploading cache to DB, loading time: " + (finish - start) + " ms.");
+            }
+        };
+        loaderHandler = scheduler.scheduleAtFixedRate(loader, 20, 20, TimeUnit.SECONDS);
+    }
+
+    /**
+     * stops scheduled task for cache to bd ploading
+     */
+    public void stopDBsync() {
+        loaderHandler.cancel(true);
+    }
+
 
 }
