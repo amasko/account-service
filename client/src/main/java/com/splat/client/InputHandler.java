@@ -2,7 +2,6 @@ package com.splat.client;
 
 import com.splat.common.AccountService;
 import org.apache.log4j.Logger;
-
 import java.io.InputStreamReader;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -16,11 +15,14 @@ public class InputHandler {
     private int from, to;
 
     public void handleInput() throws RemoteException, NotBoundException {
+        Scanner scanner = new Scanner(new InputStreamReader(System.in));
+        System.out.println("Please, enter server's host name ");
+        String host = scanner.next();
+        //connect to server
         String name = "Service";
         Registry registry;
-        registry = LocateRegistry.getRegistry("localhost", 1099);
+        registry = LocateRegistry.getRegistry(host, 1099);
         AccountService service = (AccountService) registry.lookup(name);
-        Scanner scanner = new Scanner(new InputStreamReader(System.in));
         System.out.println("Enter number of readers to call getAmount(id) method (rCount).");
         String rCount = "";
         while (!(checkCounts(rCount))) {
@@ -42,7 +44,7 @@ public class InputHandler {
         //Starting readers and writers
         ClientsInputManager mgr = new ClientsInputManager(toInt(rCount), toInt(wCount), from, to, service);
         mgr.execute();
-        System.out.println("enter letter `s` if you want to get server load statistics;\n" +
+        System.out.println("enter `s` if you want to get server load statistics;\n" +
                 "enter `r` if you want to reset statistics;\n" +
                 "enter `e` if you want to stop client execution");
         String dispatch = "";
@@ -50,11 +52,11 @@ public class InputHandler {
             dispatch = scanner.next();
             switch (dispatch) {
                 case "s":
-                    long[] l;
-                    l = service.getStats();
-                    System.out.println("Measurement interval: "+l[0]+"\n" +
-                            " Number of queries: " + l[1] +
-                            "\naverage server load: " + l[2] + " query/second;");
+                    long[] stats;
+                    stats = service.getStats();
+                    System.out.println("Measurement interval: " + (double) (stats[0] / 1000) + " seconds\n" +
+                            "Number of queries: " + stats[1] +
+                            "\naverage server load: " + stats[2] + " query/second;");
                     break;
                 case "r":
                     service.resetStatistics();
@@ -64,15 +66,13 @@ public class InputHandler {
                     System.out.println("Client shutting down...");
                     break;
                 default:
-                    System.out.println("Enter `s`, `r` and `e` are only allowed for input:");
+                    System.out.println("Letters `s`, `r` and `e` are only allowed for input:");
                     break;
             }
         }
         mgr.stop();
         scanner.close();
-        System.out.println("done");
         System.exit(0);
-
     }
     private boolean checkCounts(String s) {
         if (Pattern.matches("\\d+", s)) {

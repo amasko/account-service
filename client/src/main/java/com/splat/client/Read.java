@@ -7,9 +7,6 @@ import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.util.Random;
 
-/**
- * Created by Alex on 07.09.2014.
- */
 public class Read implements Runnable{
     private static Logger LOG = Logger.getLogger(Read.class);
     private Random random;

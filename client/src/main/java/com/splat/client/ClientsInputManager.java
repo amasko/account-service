@@ -2,6 +2,7 @@ package com.splat.client;
 
 import com.splat.common.AccountService;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -30,7 +31,8 @@ public class ClientsInputManager {
     /**
      * starts readers and writers threads
      */
-    public void execute() {
+    public void execute() throws RemoteException {
+        service.resetStatistics();
         while (wCount > 0) {
             futures.add(writePool.submit(new Write(random, from, to, service)));
             wCount--;

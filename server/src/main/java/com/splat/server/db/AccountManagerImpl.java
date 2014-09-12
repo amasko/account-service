@@ -83,6 +83,4 @@ public class AccountManagerImpl implements AccountManager{
     public void stopDBsync() {
         loaderHandler.cancel(true);
     }
-
-
 }

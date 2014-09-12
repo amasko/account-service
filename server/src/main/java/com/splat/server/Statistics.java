@@ -6,7 +6,7 @@ public enum Statistics {
     INSTANCE;
     private final AtomicLong queries = new AtomicLong(0);
     private long timeStamp;
-
+    
     public void initStatistics() {
         queries.set(0);
         timeStamp = System.currentTimeMillis();
